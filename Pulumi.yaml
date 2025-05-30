@@ -1,0 +1,7 @@
+name: pulumi-cloud-run-with-google-build
+description: Google Cloud Pulumi project that builds Cloud Run with Cloud Build.
+runtime: go
+config:
+  pulumi:tags:
+    value:
+      pulumi:template: gcp-go

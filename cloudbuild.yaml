@@ -1,0 +1,41 @@
+---
+steps:
+  # Build the Dockerfile
+  - name: gcr.io/cloud-builders/docker
+    entrypoint: sh
+    args:
+      - -c
+      - |
+        export $(grep -v '^#' .env | xargs)
+        docker build . -t $$PULUMI_CLOUDRUN_SERVICE_CONTAINER_IMAGE
+
+  # Push image to artifacts
+  - name: gcr.io/cloud-builders/docker
+    entrypoint: sh
+    args:
+      - -c
+      - |
+        export $(grep -v '^#' .env | xargs)
+        docker push $$PULUMI_CLOUDRUN_SERVICE_CONTAINER_IMAGE
+
+  # Pulumi preview
+  - name: "pulumi/pulumi:latest"
+    entrypoint: "/bin/sh"
+    args:
+      - -c
+      - |
+        export PULUMI_CONFIG_PASSPHRASE=""
+        pulumi login gs://pulumi-state-bucket-test-joeri
+        pulumi preview --stack sbx
+
+  # Pulumi up
+  - name: "pulumi/pulumi:latest"
+    entrypoint: "/bin/sh"
+    args:
+      - -c
+      - |
+        export PULUMI_CONFIG_PASSPHRASE=""
+        pulumi login gs://pulumi-state-bucket-test-joeri
+        pulumi up --yes --stack sbx
+options:
+  defaultLogsBucketBehavior: REGIONAL_USER_OWNED_BUCKET
